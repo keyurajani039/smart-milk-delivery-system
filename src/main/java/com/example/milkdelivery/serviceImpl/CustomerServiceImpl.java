@@ -7,14 +7,23 @@ import com.example.milkdelivery.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import com.example.milkdelivery.entity.Delivery;
+import com.example.milkdelivery.repository.DeliveryRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import java.util.List;
+
+
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private DeliveryRepository deliveryRepository;
 
     @Override
     public Customer saveCustomer(Customer customer) {
@@ -73,15 +82,51 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = customerRepository
                 .findById(customerId)
                 .orElseThrow(() ->
-                        new RuntimeException("Customer not found"));
+                        new RuntimeException(
+                                "Customer not found"
+                        ));
 
-        // Delivery completed
+        // Mark customer delivered
         customer.setDeliveryCompleted(true);
-
 
         customerRepository.save(customer);
 
-        return "Delivery completed successfully";
+        // Create delivery history
+        Delivery delivery = new Delivery();
+
+        delivery.setCustomer(customer);
+
+        delivery.setUser(customer.getUser());
+
+        delivery.setDeliveryDate(LocalDate.now());
+
+        delivery.setDeliveryTime(LocalDateTime.now());
+
+        delivery.setMilkQuantity(
+                customer.getMilkQuantity()
+        );
+
+        delivery.setExtraMilk(
+                customer.getExtraMilk() == null
+                        ? 0.0
+                        : customer.getExtraMilk()
+        );
+
+        delivery.setTotalMilk(
+                customer.getMilkQuantity()
+                        +
+                        (customer.getExtraMilk() == null
+                                ? 0.0
+                                : customer.getExtraMilk())
+        );
+
+        delivery.setDeliveryStatus(
+                "DELIVERED"
+        );
+
+        deliveryRepository.save(delivery);
+
+        return "Delivery completed and history saved successfully";
     }
 
     @Override
