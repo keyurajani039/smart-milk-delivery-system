@@ -1,6 +1,7 @@
 package com.example.milkdelivery.serviceImpl;
 
 import com.example.milkdelivery.dto.DeliveryDto;
+import com.example.milkdelivery.dto.MonthlySummaryDto;
 import com.example.milkdelivery.entity.Delivery;
 import com.example.milkdelivery.exception.ResourceNotFoundException;
 import com.example.milkdelivery.repository.DeliveryRepository;
@@ -164,6 +165,64 @@ public class DeliveryServiceImpl implements DeliveryService {
                         delivery.getCreatedAt()
                 )
 
+                .build();
+    }
+
+    @Override
+    public MonthlySummaryDto getMonthlySummary(
+            Long customerId,
+            int year,
+            int month) {
+
+        LocalDate startDate =
+                LocalDate.of(year, month, 1);
+
+        LocalDate endDate =
+                startDate.withDayOfMonth(
+                        startDate.lengthOfMonth()
+                );
+
+        List<Delivery> deliveries =
+                deliveryRepository
+                        .findByCustomer_IdAndDeliveryDateBetween(
+                                customerId,
+                                startDate,
+                                endDate
+                        );
+
+        if (deliveries.isEmpty()) {
+
+            throw new ResourceNotFoundException(
+                    "No deliveries found for this month"
+            );
+        }
+
+        Double totalMilk =
+                deliveries.stream()
+                        .mapToDouble(
+                                Delivery::getTotalMilk
+                        )
+                        .sum();
+
+        Double totalExtraMilk =
+                deliveries.stream()
+                        .mapToDouble(
+                                Delivery::getExtraMilk
+                        )
+                        .sum();
+
+        return MonthlySummaryDto.builder()
+                .customerId(customerId)
+                .customerName(
+                        deliveries.get(0)
+                                .getCustomer()
+                                .getCustomerName()
+                )
+                .totalDeliveries(
+                        deliveries.size()
+                )
+                .totalMilk(totalMilk)
+                .totalExtraMilk(totalExtraMilk)
                 .build();
     }
 }

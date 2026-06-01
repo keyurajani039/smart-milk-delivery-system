@@ -1,6 +1,7 @@
 package com.example.milkdelivery.controller;
 
 import com.example.milkdelivery.dto.DeliveryDto;
+import com.example.milkdelivery.dto.MonthlySummaryDto;
 import com.example.milkdelivery.entity.Delivery;
 import com.example.milkdelivery.service.DeliveryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,5 +65,21 @@ public class DeliveryController {
                         year,
                         month
                 );
+    }
+
+    @GetMapping("/monthly-summary")
+    public MonthlySummaryDto getMonthlySummary(
+
+            @RequestParam Long customerId,
+
+            @RequestParam int year,
+
+            @RequestParam int month) {
+
+        return deliveryService.getMonthlySummary(
+                customerId,
+                year,
+                month
+        );
     }
 }
