@@ -20,4 +20,8 @@ public interface CustomerService {
     String deleteCustomer(Long id);
 
     String pauseCustomer(PauseCustomerRequest request);
+
+    String activateCustomer(Long id);
+
+    String resumeCustomer(Long id);
 }

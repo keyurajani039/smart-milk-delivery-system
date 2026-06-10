@@ -19,4 +19,5 @@ public interface DeliveryRepository
             LocalDate endDate
     );
 
+    List<Delivery> findByUser_IdAndDeliveryDate(Long userId, LocalDate deliveryDate);
 }

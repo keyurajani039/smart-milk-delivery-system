@@ -1,0 +1,505 @@
+{
+	"info": {
+		"_postman_id": "8c66e2c3-9b88-466d-a3df-be771c50e7b9",
+		"name": "Smart Milk Delivery ERP & SaaS APIs",
+		"description": "Collection containing all required endpoints for SaaS subscription verification, billing, PDF invoicing, tracking, Telegram bots, routing, and Super Admin audits.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Keyur\",\n    \"lastName\": \"Rajani\",\n    \"milkCompanyName\": \"Surat Fresh Milk Cooperative\",\n    \"phoneNumber\": \"9876543210\",\n    \"email\": \"keyur@freshmilk.com\",\n    \"password\": \"coopPassword123\",\n    \"role\": \"DELIVERY_MAN\",\n    \"telegramId\": \"12345678\",\n    \"deviceId\": \"mobile_android_uuid_12345\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"9876543210\",\n    \"password\": \"coopPassword123\",\n    \"deviceId\": \"mobile_android_uuid_12345\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{YOUR_REFRESH_TOKEN}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/auth/refresh-token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customers & Categories",
+			"item": [
+				{
+					"name": "Save Milk Category",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"categoryName\": \"Cow Milk\",\n    \"pricePerLiter\": 60.0,\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/milk-categories/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"milk-categories",
+								"save"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Save Customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerName\": \"Aarav Mehta\",\n    \"phoneNumber\": \"9988776655\",\n    \"address\": \"G-402 Shanti Niketan, Surat\",\n    \"latitude\": 21.1702,\n    \"longitude\": 72.8311,\n    \"milkQuantity\": 1.5,\n    \"active\": true,\n    \"milkCategory\": {\n        \"id\": 1\n    },\n    \"user\": {\n        \"id\": 1\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/customers/save",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"customers",
+								"save"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Customers by Milkman",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/customers/all/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"customers",
+								"all",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Deliveries & Live Sessions",
+			"item": [
+				{
+					"name": "Start Delivery Session",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"milkmanId\": 1,\n    \"loadedMilk\": 120.0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/deliveries/start-session",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"deliveries",
+								"start-session"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session Summary & Remaining Milk",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/deliveries/session-summary/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"deliveries",
+								"session-summary",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Customer Delivered",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/customers/delivered/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"customers",
+								"delivered",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Skip Delivery Today & Broadcast Telegram",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"milkmanId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/deliveries/skip-today",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"deliveries",
+								"skip-today"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payments & Reports",
+			"item": [
+				{
+					"name": "Generate Bill",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": 1,\n    \"month\": 6,\n    \"year\": 2026\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/payments/generate-bill",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"payments",
+								"generate-bill"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download PDF Invoice",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/payments/invoice/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"payments",
+								"invoice",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get UPI Payment QR base64",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/payments/qr/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"payments",
+								"qr",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Export Monthly Excel Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/reports/monthly?month=6&year=2026&format=excel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"reports",
+								"monthly"
+							],
+							"query": [
+								{
+									"key": "month",
+									"value": "6"
+								},
+								{
+									"key": "year",
+									"value": "2026"
+								},
+								{
+									"key": "format",
+									"value": "excel"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Telegram Bot Simulator",
+			"item": [
+				{
+					"name": "Telegram Webhook Gujarati Extra Milk",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"update_id\": 98765,\n    \"message\": {\n        \"message_id\": 101,\n        \"from\": {\n            \"id\": 12345678,\n            \"first_name\": \"Aarav\"\n        },\n        \"chat\": {\n            \"id\": 12345678\n        },\n        \"text\": \"મને કાલે ૨ લીટર દૂધ વધારે આપજો\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/api/telegram/webhook",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"telegram",
+								"webhook"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Super Admin SaaS Panel",
+			"item": [
+				{
+					"name": "List All Milkmen",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/super-admin/milkmen",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"super-admin",
+								"milkmen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Block Milkman User",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/super-admin/milkmen/1/block?block=true",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"super-admin",
+								"milkmen",
+								"1",
+								"block"
+							],
+							"query": [
+								{
+									"key": "block",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

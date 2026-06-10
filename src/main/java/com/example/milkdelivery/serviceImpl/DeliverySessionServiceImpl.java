@@ -53,6 +53,8 @@ public class DeliverySessionServiceImpl
 
                         .active(true)
 
+                        .loadedMilkQuantity(0.0)
+
                         .build();
 
         deliverySessionRepository.save(session);

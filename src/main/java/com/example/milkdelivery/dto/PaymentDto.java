@@ -25,6 +25,8 @@ public class PaymentDto {
 
     private String paymentStatus;
 
+    private String paymentType;
+
     private LocalDate paymentDate;
 
     private String remarks;

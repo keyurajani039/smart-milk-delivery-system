@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import com.example.milkdelivery.security.UserDetailsImpl;
 
 import java.io.IOException;
 
@@ -57,6 +58,16 @@ public class JwtFilter extends OncePerRequestFilter {
                             .loadUserByUsername(phoneNumber);
 
             if (jwtUtil.validateToken(token)) {
+
+                // SaaS check: Prevent blocked users
+                if (userDetails instanceof UserDetailsImpl) {
+                    com.example.milkdelivery.entity.User userEntity = ((UserDetailsImpl) userDetails).getUser();
+                    if (Boolean.TRUE.equals(userEntity.getBlocked())) {
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.getWriter().write("Account is blocked. Contact Super Admin.");
+                        return;
+                    }
+                }
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(

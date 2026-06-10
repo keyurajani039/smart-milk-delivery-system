@@ -1,0 +1,18 @@
+{
+    "update_id": 10002,
+    "message": {
+        "message_id": 2,
+        "from": {
+            "id": 98765432,
+            "first_name": "NewCustomer"
+        },
+        "chat": {
+            "id": 98765432
+        },
+        "contact": {
+            "phone_number": "9327304553",
+            "first_name": "NewCustomer",
+            "user_id": 98765432
+        }
+    }
+}

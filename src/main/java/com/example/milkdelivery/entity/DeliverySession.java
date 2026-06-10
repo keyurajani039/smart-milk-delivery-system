@@ -33,6 +33,8 @@ public class DeliverySession {
     // Session active or not
     private Boolean active = true;
 
+    private Double loadedMilkQuantity = 0.0;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

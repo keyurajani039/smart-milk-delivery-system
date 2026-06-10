@@ -1,0 +1,17 @@
+{
+    "update_id": 10008,
+    "message": {
+        "message_id": 8,
+        "from": {
+            "id": 98765432,
+            "first_name": "NewCustomer"
+        },
+        "chat": {
+            "id": 98765432
+        },
+        "voice": {
+            "file_id": "voice_file_1",
+            "duration": 2
+        }
+    }
+}

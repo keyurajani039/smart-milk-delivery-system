@@ -52,10 +52,28 @@ public class User {
 
     private String deviceId;
 
+    private String password;
+
+    private String profileImage;
+
+    private LocalDateTime trialStartDate;
+
+    private LocalDateTime trialEndDate;
+
+    private LocalDateTime subscriptionEndDate;
+
+    @Column(name = "is_blocked")
+    private Boolean blocked = false;
+
+    private Long subscriptionPlanId;
+
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
 
     private String providerId;
+
+    @Column(name = "upi_id")
+    private String upiId;
 
     @Enumerated(EnumType.STRING)
     private Role role;
