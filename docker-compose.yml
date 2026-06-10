@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: smart-milk-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234567"
+      MYSQL_DATABASE: "smart_milk_delivery"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - milk-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234567"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: smart-milk-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - milk-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: smart-milk-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - milk-network
+
+  app:
+    build: .
+    container_name: smart-milk-app
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=smart_milk_delivery
+      - DB_USER=root
+      - DB_PASSWORD=1234567
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - OLLAMA_API_URL=http://ollama:11434
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - milk-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: smart-milk-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - milk-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: smart-milk-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - milk-network
+
+volumes:
+  mysql-data:
+  redis-data:
+  ollama-data:
+  grafana-data:
+
+networks:
+  milk-network:
+    driver: bridge

@@ -31,7 +31,11 @@ public class CustomerDto {
 
     private Integer pauseDays;
 
-    private String milkType;
+    private Long milkCategoryId;
+
+    private String milkCategoryName;
+
+    private Double milkPrice;
 
     private Boolean active;
 

@@ -8,4 +8,6 @@ import lombok.Setter;
 public class LoginRequest {
 
     private String phoneNumber;
+    private String password;
+    private String deviceId;
 }

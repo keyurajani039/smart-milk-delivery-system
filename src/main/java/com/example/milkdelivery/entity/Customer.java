@@ -34,6 +34,8 @@ public class Customer {
     )
     private String phoneNumber;
 
+    private String telegramId;
+
     private String address;
 
     private Double latitude;
@@ -61,6 +63,9 @@ public class Customer {
     // Pause end date
     private LocalDate pauseEndDate;
 
+    // Extra milk start date
+    private LocalDate extraMilkStartDate;
+
     // Active customer
     private Boolean active = true;
 
@@ -68,7 +73,9 @@ public class Customer {
     private Boolean deliveryCompleted = false;
 
     // Milk type
-    private String milkType;
+    @ManyToOne
+    @JoinColumn(name = "milk_category_id")
+    private MilkCategory milkCategory;
 
     @JsonBackReference
     @ManyToOne

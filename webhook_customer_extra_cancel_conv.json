@@ -1,0 +1,14 @@
+{
+    "update_id": 10011,
+    "message": {
+        "message_id": 11,
+        "from": {
+            "id": 98765432,
+            "first_name": "NewCustomer"
+        },
+        "chat": {
+            "id": 98765432
+        },
+        "text": "વધારે દૂધ કેન્સલ કરો"
+    }
+}

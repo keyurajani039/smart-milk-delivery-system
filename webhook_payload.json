@@ -1,0 +1,14 @@
+{
+    "update_id": 98765,
+    "message": {
+        "message_id": 101,
+        "from": {
+            "id": 12345678,
+            "first_name": "Aarav"
+        },
+        "chat": {
+            "id": 12345678
+        },
+        "text": "મને કાલે ૨ લીટર દૂધ વધારે આપજો"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "update_id": 30003,
+    "message": {
+        "message_id": 303,
+        "from": {
+            "id": 98765432,
+            "first_name": "abs"
+        },
+        "chat": {
+            "id": 98765432
+        },
+        "voice": {
+            "file_id": "voice_bill_file",
+            "duration": 11
+        }
+    }
+}

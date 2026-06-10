@@ -27,6 +27,8 @@ public class UserDto {
 
     private String telegramId;
 
+    private String upiId;
+
     private String role;
 
     private String status;

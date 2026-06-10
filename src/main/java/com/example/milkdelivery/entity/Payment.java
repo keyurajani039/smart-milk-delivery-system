@@ -1,6 +1,7 @@
 package com.example.milkdelivery.entity;
 
 import com.example.milkdelivery.enums.PaymentStatus;
+import com.example.milkdelivery.enums.PaymentType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +34,9 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType;
 
     private LocalDate paymentDate;
 

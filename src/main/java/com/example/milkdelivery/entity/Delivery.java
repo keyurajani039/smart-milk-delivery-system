@@ -48,6 +48,10 @@ public class Delivery {
     // DELIVERED / SKIPPED / PAUSED
     private String deliveryStatus;
 
+    private Double latitude;
+
+    private Double longitude;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

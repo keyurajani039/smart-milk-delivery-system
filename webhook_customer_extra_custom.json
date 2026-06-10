@@ -1,0 +1,14 @@
+{
+    "update_id": 10007,
+    "message": {
+        "message_id": 7,
+        "from": {
+            "id": 98765432,
+            "first_name": "NewCustomer"
+        },
+        "chat": {
+            "id": 98765432
+        },
+        "text": "/extra 3"
+    }
+}
