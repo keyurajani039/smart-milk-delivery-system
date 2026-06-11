@@ -212,7 +212,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         // Calculate total milk delivered today
         List<Delivery> todayDeliveries = deliveryRepository.findByUser_IdAndDeliveryDate(milkmanId, LocalDate.now());
         double totalDelivered = todayDeliveries.stream()
-                .filter(d -> "DELIVERED".equals(d.getDeliveryStatus()))
+                .filter(d -> d.getDeliveryStatus() != null && "DELIVERED".equalsIgnoreCase(d.getDeliveryStatus().trim()))
                 .mapToDouble(Delivery::getTotalMilk)
                 .sum();
 

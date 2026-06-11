@@ -8,6 +8,7 @@ import com.example.milkdelivery.dto.LoginResponse;
 import com.example.milkdelivery.dto.RegisterRequest;
 import com.example.milkdelivery.entity.User;
 import com.example.milkdelivery.service.UserService;
+import com.example.milkdelivery.service.DummyDataService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DummyDataService dummyDataService;
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@Valid @RequestBody RegisterRequest request) {
@@ -70,7 +74,7 @@ public class AuthController {
     private JdbcTemplate jdbcTemplate;
 
     @PostMapping("/reset-db")
-    public ResponseEntity<String> resetDb() {
+    public ResponseEntity<String> resetDb(@RequestParam(value = "seed", defaultValue = "false") boolean seed) {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0;");
         jdbcTemplate.execute("TRUNCATE TABLE deliveries;");
         jdbcTemplate.execute("TRUNCATE TABLE payments;");
@@ -79,8 +83,24 @@ public class AuthController {
         jdbcTemplate.execute("TRUNCATE TABLE delivery_sessions;");
         jdbcTemplate.execute("TRUNCATE TABLE customers;");
         jdbcTemplate.execute("TRUNCATE TABLE users;");
+        jdbcTemplate.execute("TRUNCATE TABLE milk_categories;");
+        jdbcTemplate.execute("TRUNCATE TABLE plan_cancellations;");
+        jdbcTemplate.execute("TRUNCATE TABLE subscription_payments;");
+        jdbcTemplate.execute("TRUNCATE TABLE routes;");
+        jdbcTemplate.execute("TRUNCATE TABLE route_details;");
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1;");
+        
+        if (seed) {
+            dummyDataService.seedData();
+            return ResponseEntity.ok("DB Reset and Seeded Successfully");
+        }
         return ResponseEntity.ok("DB Reset Successful");
+    }
+
+    @PostMapping("/seed")
+    public ResponseEntity<String> seedDb() {
+        dummyDataService.seedData();
+        return ResponseEntity.ok("DB Seeded Successfully");
     }
 
     @PostMapping("/firebase-login")

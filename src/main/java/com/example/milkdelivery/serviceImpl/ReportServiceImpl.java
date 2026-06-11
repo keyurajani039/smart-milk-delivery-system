@@ -53,9 +53,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-        List<Delivery> deliveries = deliveryRepository.findByCustomer_IdAndDeliveryDateBetween(null, start, end).stream()
-                .filter(d -> d.getUser().getId().equals(milkmanId))
-                .toList();
+        List<Delivery> deliveries = deliveryRepository.findByUser_IdAndDeliveryDateBetween(milkmanId, start, end);
 
         List<ExtraCustomerSale> extraSales = extraSaleRepository.findByUserIdAndSaleDateBetween(milkmanId, start, end);
 
@@ -73,9 +71,7 @@ public class ReportServiceImpl implements ReportService {
         LocalDate start = LocalDate.of(year, 1, 1);
         LocalDate end = LocalDate.of(year, 12, 31);
 
-        List<Delivery> deliveries = deliveryRepository.findByCustomer_IdAndDeliveryDateBetween(null, start, end).stream()
-                .filter(d -> d.getUser().getId().equals(milkmanId))
-                .toList();
+        List<Delivery> deliveries = deliveryRepository.findByUser_IdAndDeliveryDateBetween(milkmanId, start, end);
 
         List<ExtraCustomerSale> extraSales = extraSaleRepository.findByUserIdAndSaleDateBetween(milkmanId, start, end);
 

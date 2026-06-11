@@ -20,4 +20,6 @@ public interface DeliveryRepository
     );
 
     List<Delivery> findByUser_IdAndDeliveryDate(Long userId, LocalDate deliveryDate);
+
+    List<Delivery> findByUser_IdAndDeliveryDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 }

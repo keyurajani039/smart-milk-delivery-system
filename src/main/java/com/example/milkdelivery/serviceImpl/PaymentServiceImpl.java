@@ -95,24 +95,29 @@ public class PaymentServiceImpl implements PaymentService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        // Check duplicate bill
-        Optional<Payment> existingBill = paymentRepository.findByCustomerIdAndMonthAndYear(customerId, month, year);
-        if (existingBill.isPresent()) {
-            return existingBill.get();
-        }
-
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
         // Sum delivered milk volumes
         List<Delivery> deliveries = deliveryRepository.findByCustomer_IdAndDeliveryDateBetween(customerId, startDate, endDate);
         double totalDeliveredMilk = deliveries.stream()
-                .filter(d -> "DELIVERED".equals(d.getDeliveryStatus()))
+                .filter(d -> d.getDeliveryStatus() != null && "DELIVERED".equalsIgnoreCase(d.getDeliveryStatus().trim()))
                 .mapToDouble(Delivery::getTotalMilk)
                 .sum();
 
         double pricePerLiter = customer.getMilkCategory().getPricePerLiter();
         double totalAmount = totalDeliveredMilk * pricePerLiter;
+
+        // Check duplicate bill
+        Optional<Payment> existingBill = paymentRepository.findByCustomerIdAndMonthAndYear(customerId, month, year);
+        if (existingBill.isPresent()) {
+            Payment bill = existingBill.get();
+            if (bill.getPaymentStatus() == PaymentStatus.UNPAID) {
+                bill.setAmount(totalAmount);
+                return paymentRepository.save(bill);
+            }
+            return bill;
+        }
 
         Payment payment = Payment.builder()
                 .customer(customer)
@@ -142,6 +147,13 @@ public class PaymentServiceImpl implements PaymentService {
     public byte[] generateInvoicePdf(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+
+        // Recalculate and update amount if unpaid to ensure database and PDF remain in sync
+        if (payment.getPaymentStatus() == PaymentStatus.UNPAID) {
+            double latestAmount = calculateLatestAmount(payment);
+            payment.setAmount(latestAmount);
+            payment = paymentRepository.save(payment);
+        }
 
         Customer customer = payment.getCustomer();
         User milkman = customer.getUser();
@@ -241,7 +253,7 @@ public class PaymentServiceImpl implements PaymentService {
                 double totQty = d.getTotalMilk() != null ? d.getTotalMilk() : 0.0;
 
                 double amount = 0.0;
-                if ("DELIVERED".equals(status)) {
+                if (status != null && "DELIVERED".equalsIgnoreCase(status.trim())) {
                     amount = totQty * pricePerLiter;
                 } else {
                     regQty = 0.0;
@@ -333,6 +345,13 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
+        // Recalculate and update amount if unpaid to ensure QR code has latest amount
+        if (payment.getPaymentStatus() == PaymentStatus.UNPAID) {
+            double latestAmount = calculateLatestAmount(payment);
+            payment.setAmount(latestAmount);
+            payment = paymentRepository.save(payment);
+        }
+
         Customer customer = payment.getCustomer();
         User milkman = customer.getUser();
 
@@ -391,6 +410,19 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
         logger.info("Automated bulk billing complete.");
+    }
+
+    private double calculateLatestAmount(Payment payment) {
+        Customer customer = payment.getCustomer();
+        LocalDate startDate = LocalDate.of(payment.getYear(), payment.getMonth(), 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        List<Delivery> deliveries = deliveryRepository.findByCustomer_IdAndDeliveryDateBetween(customer.getId(), startDate, endDate);
+        double totalDeliveredMilk = deliveries.stream()
+                .filter(d -> d.getDeliveryStatus() != null && "DELIVERED".equalsIgnoreCase(d.getDeliveryStatus().trim()))
+                .mapToDouble(Delivery::getTotalMilk)
+                .sum();
+        double pricePerLiter = customer.getMilkCategory().getPricePerLiter();
+        return totalDeliveredMilk * pricePerLiter;
     }
 
     private PaymentDto convertToDto(Payment payment) {

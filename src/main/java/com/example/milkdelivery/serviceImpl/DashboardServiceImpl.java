@@ -48,11 +48,11 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<Delivery> todayDeliveries = deliveryRepository.findByUser_IdAndDeliveryDate(milkmanId, LocalDate.now());
         long todayDeliveriesCount = todayDeliveries.stream()
-                .filter(d -> "DELIVERED".equals(d.getDeliveryStatus()))
+                .filter(d -> d.getDeliveryStatus() != null && "DELIVERED".equalsIgnoreCase(d.getDeliveryStatus().trim()))
                 .count();
 
         double todayMilkQuantity = todayDeliveries.stream()
-                .filter(d -> "DELIVERED".equals(d.getDeliveryStatus()))
+                .filter(d -> d.getDeliveryStatus() != null && "DELIVERED".equalsIgnoreCase(d.getDeliveryStatus().trim()))
                 .mapToDouble(Delivery::getTotalMilk)
                 .sum();
 

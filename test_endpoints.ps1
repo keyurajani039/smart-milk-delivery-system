@@ -114,9 +114,9 @@ Write-Output "`n--- 4. Saving Customer 1 (Aarav Mehta) ---"
 $customerBody1 = @{
     customerName = "Aarav Mehta"
     phoneNumber = "9988776655"
-    address = "G-402 Shanti Niketan, Surat"
-    latitude = 21.1702
-    longitude = 72.8311
+    address = "G-402 Shanti Niketan, Ahmedabad"
+    latitude = 23.0225
+    longitude = 72.5714
     milkQuantity = 1.5
     active = $true
     telegramId = "12345678"
@@ -134,13 +134,13 @@ try {
     # Handled inside function
 }
 
-Write-Output "`n--- 4b. Saving Customer 2 (abs - 8401516824) ---"
+Write-Output "`n--- 4b. Saving Customer 2 (khushi - 8401516824) ---"
 $customerBody2 = @{
-    customerName = "abs"
+    customerName = "khushi"
     phoneNumber = "8401516824"
-    address = "B-201 Green Valley, Surat"
-    latitude = 21.1824
-    longitude = 72.8422
+    address = "B-201 Green Valley, Ahmedabad"
+    latitude = 23.0300
+    longitude = 72.5800
     milkQuantity = 2.0
     active = $true
     telegramId = $null
@@ -175,7 +175,7 @@ try {
     # Handled inside function
 }
 
-Write-Output "`n--- 5c. Webhook: Customer abs shares contact (phone 8401516824) ---"
+Write-Output "`n--- 5c. Webhook: Customer khushi shares contact (phone 8401516824) ---"
 try {
     $webhookResponse3 = curl.exe -s -X POST -H "Content-Type: application/json; charset=utf-8" --data-binary '@webhook_customer_abs_share_contact.json' http://localhost:8081/api/telegram/webhook
     Write-Output "Response: $webhookResponse3"
@@ -191,7 +191,7 @@ try {
     # Handled inside function
 }
 
-Write-Output "`n--- 5e. Webhook: Newly linked Customer abs sends /bill command ---"
+Write-Output "`n--- 5e. Webhook: Newly linked Customer khushi sends /bill command ---"
 try {
     $webhookResponse5 = curl.exe -s -X POST -H "Content-Type: application/json; charset=utf-8" --data-binary '@webhook_registered_bill.json' http://localhost:8081/api/telegram/webhook
     Write-Output "Response: $webhookResponse5"

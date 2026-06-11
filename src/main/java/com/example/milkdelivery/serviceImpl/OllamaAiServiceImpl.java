@@ -242,32 +242,82 @@ public class OllamaAiServiceImpl implements OllamaAiService {
 
     private double parseQuantity(String text) {
         String translated = translateGujaratiDigits(text);
-        Pattern pattern = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(?:liter|liters|l|લીટર|લી)");
-        Matcher matcher = pattern.matcher(translated);
-        if (matcher.find()) {
-            return Double.parseDouble(matcher.group(1));
+        
+        // 1. Explicit keyword match
+        Pattern qtyPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(?:liter|liters|l|લીટર|લી)");
+        Matcher qtyMatcher = qtyPattern.matcher(translated);
+        if (qtyMatcher.find()) {
+            return Double.parseDouble(qtyMatcher.group(1));
         }
-        Pattern fallback = Pattern.compile("(\\d+(?:\\.\\d+)?)");
-        Matcher mFallback = fallback.matcher(translated);
-        if (mFallback.find()) {
-            return Double.parseDouble(mFallback.group(1));
+        
+        // 2. Fallback: find all numbers in text
+        List<String> allNumbers = findAllNumbers(translated);
+        for (String numStr : allNumbers) {
+            // Check if this number is followed by day keywords in the original text
+            if (isFollowedByDayKeyword(translated, numStr)) {
+                continue; // Skip, this is for days
+            }
+            return Double.parseDouble(numStr);
         }
+        
         return 0.0;
     }
 
     private int parseDays(String text) {
         String translated = translateGujaratiDigits(text);
-        Pattern pattern = Pattern.compile("(\\d+)\\s*(?:day|days|દિવસ|દિવસો|દિ)");
-        Matcher matcher = pattern.matcher(translated);
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group(1));
+        
+        // 1. Explicit keyword match
+        Pattern daysPattern = Pattern.compile("(\\d+)\\s*(?:day|days|દિવસ|દિવસો|દિ)");
+        Matcher daysMatcher = daysPattern.matcher(translated);
+        if (daysMatcher.find()) {
+            return Integer.parseInt(daysMatcher.group(1));
         }
-        Pattern fallback = Pattern.compile("(\\d+)");
-        Matcher mFallback = fallback.matcher(translated);
-        if (mFallback.find()) {
-            return Integer.parseInt(mFallback.group(1));
+        
+        // 2. Fallback: find all numbers in text
+        List<String> allNumbers = findAllNumbers(translated);
+        
+        // Identify which number is the quantity to filter it out
+        String quantityNumStr = null;
+        for (String numStr : allNumbers) {
+            if (!isFollowedByDayKeyword(translated, numStr)) {
+                quantityNumStr = numStr;
+                break;
+            }
         }
+        
+        for (String numStr : allNumbers) {
+            // Skip the quantity number
+            if (numStr.equals(quantityNumStr)) {
+                continue;
+            }
+            // Skip numbers followed by liter keywords
+            if (isFollowedByLiterKeyword(translated, numStr)) {
+                continue;
+            }
+            return Integer.parseInt(numStr);
+        }
+        
         return 0;
+    }
+
+    private List<String> findAllNumbers(String text) {
+        List<String> numbers = new ArrayList<>();
+        Pattern p = Pattern.compile("\\d+(?:\\.\\d+)?");
+        Matcher m = p.matcher(text);
+        while (m.find()) {
+            numbers.add(m.group());
+        }
+        return numbers;
+    }
+
+    private boolean isFollowedByDayKeyword(String text, String number) {
+        Pattern p = Pattern.compile(Pattern.quote(number) + "\\s*(?:day|days|દિવસ|દિવસો|દિ)");
+        return p.matcher(text).find();
+    }
+
+    private boolean isFollowedByLiterKeyword(String text, String number) {
+        Pattern p = Pattern.compile(Pattern.quote(number) + "\\s*(?:liter|liters|l|લીટર|લી)");
+        return p.matcher(text).find();
     }
 
     private String translateGujaratiDigits(String input) {

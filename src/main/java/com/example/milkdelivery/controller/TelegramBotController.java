@@ -325,7 +325,8 @@ public class TelegramBotController {
             }
         } else if (text.startsWith("/payment")) {
             LocalDate now = LocalDate.now();
-            Optional<Payment> billOpt = paymentRepository.findByCustomerIdAndMonthAndYear(customer.getId(), now.getMonthValue(), now.getYear());
+            Payment bill = paymentService.generateBill(customer.getId(), now.getMonthValue(), now.getYear());
+            Optional<Payment> billOpt = Optional.ofNullable(bill);
             if (billOpt.isEmpty()) {
                 sendTelegramMessageWithReplyMarkup(chatInstanceId, "કોઈ બાકી બિલ મળ્યું નથી. (No pending bills found.)", CUSTOM_KEYBOARD_JSON);
             } else {
@@ -531,7 +532,8 @@ public class TelegramBotController {
                 }
             } else if ("CHECK_PAYMENT".equals(action)) {
                 LocalDate now = LocalDate.now();
-                Optional<Payment> billOpt = paymentRepository.findByCustomerIdAndMonthAndYear(customer.getId(), now.getMonthValue(), now.getYear());
+                Payment bill = paymentService.generateBill(customer.getId(), now.getMonthValue(), now.getYear());
+                Optional<Payment> billOpt = Optional.ofNullable(bill);
                 if (billOpt.isEmpty()) {
                     sendTelegramMessageWithReplyMarkup(chatInstanceId, "કોઈ બાકી બિલ મળ્યું નથી. (No pending bills found.)", CUSTOM_KEYBOARD_JSON);
                 } else {
