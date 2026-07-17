@@ -123,6 +123,10 @@ public class DeliveryServiceImpl implements DeliveryService {
                 // Notify via Telegram Bot
                 telegramService.sendAbsenceNotification(customer.getTelegramId(), customer.getCustomerName(), milkman.getMilkCompanyName());
                 count++;
+            } else {
+                // If already completed or skipped today, still broadcast the Telegram message for test/retry
+                telegramService.sendAbsenceNotification(customer.getTelegramId(), customer.getCustomerName(), milkman.getMilkCompanyName());
+                count++;
             }
         }
         return "Broadcasting absence complete. Skipped deliveries for " + count + " customers.";
@@ -133,6 +137,26 @@ public class DeliveryServiceImpl implements DeliveryService {
     public DeliverySession startSession(Long milkmanId, Double loadedMilk) {
         User milkman = userRepository.findById(milkmanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Milkman not found"));
+
+        // Check once-per-day restriction with 2-minute reset for testing
+        java.time.LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
+        java.util.Optional<DeliverySession> lastSessionOpt = sessionRepository.findAll().stream()
+                .filter(s -> s.getUser().getId().equals(milkmanId) && s.getStartedAt().isAfter(startOfDay))
+                .max(java.util.Comparator.comparing(DeliverySession::getStartedAt));
+
+        if (lastSessionOpt.isPresent()) {
+            DeliverySession lastSession = lastSessionOpt.get();
+            if (Boolean.FALSE.equals(lastSession.getActive())) {
+                java.time.LocalDateTime endedAt = lastSession.getEndedAt();
+                if (endedAt != null) {
+                    long secondsSinceEnd = java.time.Duration.between(endedAt, java.time.LocalDateTime.now()).toSeconds();
+                    if (secondsSinceEnd < 120) {
+                        throw new RuntimeException("Shift can only be started once per day. Please wait 2 minutes to reset for testing (Time remaining: " 
+                            + (120 - secondsSinceEnd) + " seconds).");
+                    }
+                }
+            }
+        }
 
         // Close any existing open session
         Optional<DeliverySession> activeSessionOpt = sessionRepository.findByUser_IdAndActiveTrue(milkmanId);

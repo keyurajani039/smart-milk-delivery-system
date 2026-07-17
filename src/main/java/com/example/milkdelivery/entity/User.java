@@ -3,7 +3,7 @@ package com.example.milkdelivery.entity;
 import com.example.milkdelivery.enums.AuthProvider;
 import com.example.milkdelivery.enums.Role;
 import com.example.milkdelivery.enums.UserStatus;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -81,7 +81,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Customer> customers;
 

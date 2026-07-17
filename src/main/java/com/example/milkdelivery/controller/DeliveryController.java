@@ -51,6 +51,13 @@ public class DeliveryController {
         return deliveryService.getTodayDeliveriesByMilkman(userId);
     }
 
+    @GetMapping("/milkman/{userId}")
+    public List<Delivery> getDeliveriesByMilkman(@PathVariable Long userId) {
+        return deliveryService.getAllDeliveries().stream()
+                .filter(d -> d.getUser() != null && d.getUser().getId().equals(userId))
+                .toList();
+    }
+
     @PostMapping("/skip-today")
     public ResponseEntity<String> skipTodayDeliveries(@RequestBody Map<String, Long> body) {
         Long milkmanId = body.get("milkmanId");

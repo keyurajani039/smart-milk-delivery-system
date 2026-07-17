@@ -41,6 +41,23 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/send-otp")
+    public ResponseEntity<Map<String, String>> sendOtp(@RequestBody Map<String, String> body) {
+        String phoneNumber = body.get("phoneNumber");
+        if (phoneNumber == null || phoneNumber.length() != 10) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid phone number. Must be 10 digits."));
+        }
+        try {
+            String otp = userService.generateAndSendOtp(phoneNumber);
+            return ResponseEntity.ok(Map.of(
+                "message", "OTP sent successfully",
+                "otp", otp
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/refresh-token")
     public ResponseEntity<LoginResponse> refreshToken(@RequestBody Map<String, String> body) {
         String token = body.get("refreshToken");

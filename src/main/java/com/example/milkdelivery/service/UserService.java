@@ -15,4 +15,5 @@ public interface UserService {
     String changePassword(String phoneNumber, String oldPassword, String newPassword);
     String forgotPassword(String phoneNumber, String newPassword);
     User findByPhoneNumber(String phoneNumber);
+    String generateAndSendOtp(String phoneNumber);
 }

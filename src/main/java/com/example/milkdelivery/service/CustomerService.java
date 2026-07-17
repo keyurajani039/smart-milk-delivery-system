@@ -24,4 +24,6 @@ public interface CustomerService {
     String activateCustomer(Long id);
 
     String resumeCustomer(Long id);
+
+    String markDeliveryPausedToday(Long customerId);
 }

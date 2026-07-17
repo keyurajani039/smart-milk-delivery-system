@@ -14,6 +14,7 @@ import com.example.milkdelivery.jwt.JwtUtil;
 import com.example.milkdelivery.repository.UserDeviceSessionRepository;
 import com.example.milkdelivery.repository.UserRepository;
 import com.example.milkdelivery.service.UserService;
+import com.example.milkdelivery.service.TelegramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,34 @@ import com.google.firebase.auth.FirebaseToken;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
 
+    private static class OtpData {
+        private final String code;
+        private final LocalDateTime expiryTime;
+
+        public OtpData(String code, LocalDateTime expiryTime) {
+            this.code = code;
+            this.expiryTime = expiryTime;
+        }
+
+        public boolean isValid(String inputCode) {
+            return code.equals(inputCode) && LocalDateTime.now().isBefore(expiryTime);
+        }
+    }
+
+    private final Map<String, OtpData> otpMap = new ConcurrentHashMap<>();
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TelegramService telegramService;
 
     @Autowired
     private UserDeviceSessionRepository sessionRepository;
@@ -96,7 +118,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        boolean isOtpValid = false;
+        String enteredPassword = request.getPassword();
+        OtpData activeOtp = otpMap.get(request.getPhoneNumber());
+        if (activeOtp != null && activeOtp.isValid(enteredPassword)) {
+            isOtpValid = true;
+            otpMap.remove(request.getPhoneNumber()); // Consume the OTP code
+        }
+
+        if (!isOtpValid && !passwordEncoder.matches(enteredPassword, user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
@@ -309,5 +339,33 @@ public class UserServiceImpl implements UserService {
                 .message("Login successful via Firebase")
                 .user(userDto)
                 .build();
+    }
+
+    @Override
+    public String generateAndSendOtp(String phoneNumber) {
+        // Verify user exists and is registered
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("No delivery agent registered with this phone number."));
+
+        // Generate 6-digit OTP code
+        String otpCode = String.format("%06d", (int) (Math.random() * 1000000));
+
+        // Save active OTP
+        otpMap.put(phoneNumber, new OtpData(otpCode, LocalDateTime.now().plusMinutes(5)));
+
+        System.out.println("==================================================");
+        System.out.println("SECURE OTP DISPATCHED FOR +91 " + phoneNumber + " => " + otpCode);
+        System.out.println("==================================================");
+
+        // Send to Telegram if registered
+        if (user.getTelegramId() != null && !user.getTelegramId().isBlank()) {
+            try {
+                telegramService.sendOtpNotification(user.getTelegramId(), otpCode);
+            } catch (Exception e) {
+                System.err.println("Failed to send OTP over Telegram: " + e.getMessage());
+            }
+        }
+
+        return otpCode;
     }
 }

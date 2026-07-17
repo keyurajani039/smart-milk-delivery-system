@@ -72,12 +72,15 @@ public class Customer {
     // Today's delivery completed or not
     private Boolean deliveryCompleted = false;
 
+    @Transient
+    private String todayDeliveryStatus;
+
     // Milk type
     @ManyToOne
     @JoinColumn(name = "milk_category_id")
     private MilkCategory milkCategory;
 
-    @JsonBackReference
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

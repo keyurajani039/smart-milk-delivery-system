@@ -22,7 +22,7 @@ public class DeliverySessionScheduler {
 
     // Every 10 seconds (testing) -> @Scheduled(fixedRate = 10000)
     // Run every 5 minutes -> @Scheduled(fixedRate = 300000)
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 10000)
     public void resetDeliveryCycle() {
 
         System.out.println(
@@ -49,7 +49,7 @@ public class DeliverySessionScheduler {
 
                 // TESTING: 1 minute
                 // PRODUCTION: plusHours(12) / plusMinutes(1)
-                if (startTime.plusHours(12)
+                if (startTime.plusMinutes(1)
                         .isBefore(now)) {
 
                     System.out.println(

@@ -114,8 +114,16 @@ public class PaymentServiceImpl implements PaymentService {
             Payment bill = existingBill.get();
             if (bill.getPaymentStatus() == PaymentStatus.UNPAID) {
                 bill.setAmount(totalAmount);
-                return paymentRepository.save(bill);
+                bill = paymentRepository.save(bill);
             }
+            // Notify customer via Telegram even if bill already exists
+            telegramService.sendBillGeneratedNotification(
+                    customer.getTelegramId(),
+                    customer.getCustomerName(),
+                    bill.getAmount(),
+                    month,
+                    year
+            );
             return bill;
         }
 

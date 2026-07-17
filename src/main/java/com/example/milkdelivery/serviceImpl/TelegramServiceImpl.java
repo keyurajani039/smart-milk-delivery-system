@@ -73,6 +73,16 @@ public class TelegramServiceImpl implements TelegramService {
         send(telegramId, msg);
     }
 
+    @Override
+    public void sendOtpNotification(String telegramId, String otpCode) {
+        String msg = String.format(
+                "તમારો વેરિફિકેશન ઓટીપી કોડ છે: %s. આ કોડ ૫ મિનિટ માટે માન્ય છે.\n\n" +
+                "Your Smart Milk verification OTP code is: %s. Valid for 5 minutes.",
+                otpCode, otpCode
+        );
+        send(telegramId, msg);
+    }
+
     private void send(String telegramId, String text) {
         if (telegramId == null || telegramId.isBlank()) {
             logger.warn("Skipping telegram message. telegramId is empty.");

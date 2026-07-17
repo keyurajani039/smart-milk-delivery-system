@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,6 +27,19 @@ public class DashboardController {
     public ResponseEntity<Map<String, Object>> getStats(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getUser().getId();
         Map<String, Object> stats = dashboardService.getDashboardStats(userId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/weekly/{userId}")
+    public ResponseEntity<List<Map<String, Object>>> getWeeklyStatsByUserId(@PathVariable Long userId) {
+        List<Map<String, Object>> stats = dashboardService.getWeeklyStats(userId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/weekly")
+    public ResponseEntity<List<Map<String, Object>>> getWeeklyStats(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUser().getId();
+        List<Map<String, Object>> stats = dashboardService.getWeeklyStats(userId);
         return ResponseEntity.ok(stats);
     }
 }

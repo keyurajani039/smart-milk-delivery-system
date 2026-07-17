@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,5 +85,49 @@ public class DashboardServiceImpl implements DashboardService {
         stats.put("todayExtraSalesAmount", todayExtraSales);
 
         return stats;
+    }
+
+    @Override
+    public List<Map<String, Object>> getWeeklyStats(Long milkmanId) {
+        List<Map<String, Object>> weeklyData = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(6);
+
+        List<Delivery> deliveries = deliveryRepository.findByUser_IdAndDeliveryDateBetween(milkmanId, startDate, today);
+        List<ExtraCustomerSale> extraSales = extraSaleRepository.findByUserIdAndSaleDateBetween(milkmanId, startDate, today);
+        List<Payment> payments = paymentRepository.findByCustomer_User_Id(milkmanId);
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+
+            // Filter deliveries for the day
+            double milkQty = deliveries.stream()
+                    .filter(d -> d.getDeliveryDate().equals(date) && d.getDeliveryStatus() != null && "DELIVERED".equalsIgnoreCase(d.getDeliveryStatus().trim()))
+                    .mapToDouble(Delivery::getTotalMilk)
+                    .sum();
+
+            // Filter extra sales for the day
+            double extraSaleAmt = extraSales.stream()
+                    .filter(s -> s.getSaleDate().equals(date))
+                    .mapToDouble(ExtraCustomerSale::getAmountCollected)
+                    .sum();
+
+            // Filter paid payments on this date
+            double paidAmt = payments.stream()
+                    .filter(p -> p.getPaymentDate() != null && p.getPaymentDate().equals(date) && p.getPaymentStatus() == PaymentStatus.PAID)
+                    .mapToDouble(Payment::getAmount)
+                    .sum();
+
+            double collections = paidAmt + extraSaleAmt;
+
+            Map<String, Object> dayStats = new HashMap<>();
+            dayStats.put("date", date.toString());
+            dayStats.put("milkQuantity", milkQty);
+            dayStats.put("collections", collections);
+
+            weeklyData.add(dayStats);
+        }
+
+        return weeklyData;
     }
 }

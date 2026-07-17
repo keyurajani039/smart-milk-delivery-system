@@ -6,4 +6,5 @@ public interface TelegramService {
     void sendPaymentReceivedNotification(String telegramId, String customerName, double amount);
     void sendPaymentReminderNotification(String telegramId, String customerName, double amount);
     void sendWelcomeNotification(String telegramId, String customerName);
+    void sendOtpNotification(String telegramId, String otpCode);
 }

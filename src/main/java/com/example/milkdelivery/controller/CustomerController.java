@@ -65,4 +65,9 @@ public class CustomerController {
         }
         return customerService.resumeCustomer(id);
     }
+
+    @PostMapping("/paused-today/{id}")
+    public String markDeliveryPausedToday(@PathVariable Long id) {
+        return customerService.markDeliveryPausedToday(id);
+    }
 }
