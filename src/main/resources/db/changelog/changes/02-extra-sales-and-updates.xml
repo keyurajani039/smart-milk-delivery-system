@@ -6,6 +6,9 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="10" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="extra_customer_sales"/></not>
+        </preConditions>
         <createTable tableName="extra_customer_sales">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -29,6 +32,9 @@
     </changeSet>
 
     <changeSet id="11" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="delivery_sessions"/></not>
+        </preConditions>
         <createTable tableName="delivery_sessions">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -50,12 +56,18 @@
     </changeSet>
 
     <changeSet id="12" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="customers" columnName="extra_milk_start_date"/></not>
+        </preConditions>
         <addColumn tableName="customers">
             <column name="extra_milk_start_date" type="DATE"/>
         </addColumn>
     </changeSet>
 
     <changeSet id="13" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="plan_cancellations"/></not>
+        </preConditions>
         <createTable tableName="plan_cancellations">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -70,12 +82,18 @@
     </changeSet>
 
     <changeSet id="14" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="users" columnName="upi_id"/></not>
+        </preConditions>
         <addColumn tableName="users">
             <column name="upi_id" type="VARCHAR(255)"/>
         </addColumn>
     </changeSet>
 
     <changeSet id="15" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="subscription_payments"/></not>
+        </preConditions>
         <createTable tableName="subscription_payments">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>

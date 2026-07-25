@@ -6,6 +6,9 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="1" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="users"/></not>
+        </preConditions>
         <createTable tableName="users">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -37,6 +40,9 @@
     </changeSet>
 
     <changeSet id="2" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="milk_categories"/></not>
+        </preConditions>
         <createTable tableName="milk_categories">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -54,6 +60,9 @@
     </changeSet>
 
     <changeSet id="3" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="customers"/></not>
+        </preConditions>
         <createTable tableName="customers">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -91,6 +100,9 @@
     </changeSet>
 
     <changeSet id="4" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="deliveries"/></not>
+        </preConditions>
         <createTable tableName="deliveries">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -122,6 +134,9 @@
     </changeSet>
 
     <changeSet id="5" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="payments"/></not>
+        </preConditions>
         <createTable tableName="payments">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -148,6 +163,9 @@
     </changeSet>
 
     <changeSet id="6" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="routes"/></not>
+        </preConditions>
         <createTable tableName="routes">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -167,6 +185,9 @@
     </changeSet>
 
     <changeSet id="7" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="route_details"/></not>
+        </preConditions>
         <createTable tableName="route_details">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -182,6 +203,9 @@
     </changeSet>
 
     <changeSet id="8" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="trackings"/></not>
+        </preConditions>
         <createTable tableName="trackings">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -200,6 +224,9 @@
     </changeSet>
 
     <changeSet id="9" author="smart-milk">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="subscription_plans"/></not>
+        </preConditions>
         <createTable tableName="subscription_plans">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
