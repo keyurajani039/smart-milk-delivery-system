@@ -29,6 +29,9 @@ public class OllamaAiServiceImpl implements OllamaAiService {
     @Value("${openai.api.key:}")
     private String openAiApiKey;
 
+    @Value("${ollama.model:llama3}")
+    private String ollamaModel;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
@@ -112,7 +115,57 @@ public class OllamaAiServiceImpl implements OllamaAiService {
                     }
                 }
             } catch (Exception e) {
-                logger.warn("OpenAI GPT parser failed: {}. Falling back to local Regex parser.", e.getMessage());
+                logger.warn("OpenAI GPT parser failed: {}. Falling back to Ollama/Regex.", e.getMessage());
+            }
+        }
+
+        // Try local Ollama parsing if OpenAI is not used or failed
+        if (result.get("action") == null || "NONE".equals(result.get("action"))) {
+            try {
+                String prompt = "You are an AI assistant for a smart milk delivery system.\n" +
+                        "Parse the user request (which may be in Gujarati, English, or mixed) and map it to one of these actions:\n" +
+                        "- EXTRA_MILK (when user requests extra milk. For this action, extract double quantity and int days if specified. If not specified, default to quantity 1.0 and days 1. If user cancels extra milk, action should be CANCEL_EXTRA_MILK).\n" +
+                        "- CANCEL_EXTRA_MILK (when user cancels their extra milk request, e.g. \"cancel extra\", \"વધારે દૂધ કેન્સલ કરો\", \"extra milk 0\", \"0 extra\").\n" +
+                        "- PAUSE_DELIVERY (when user wants to pause/stop milk delivery temporarily. Extract int days if specified, default to 3).\n" +
+                        "- RESUME_DELIVERY (when user wants to resume/start milk delivery again, e.g. \"resume\", \"ચાલુ કરો\").\n" +
+                        "- CHECK_BILL (when user asks for their bill or invoice, e.g. \"bill\", \"બિલ કેટલું થયું\").\n" +
+                        "- CHECK_PAYMENT (when user asks about payment or how to pay).\n" +
+                        "- TRACK_LOCATION (when user asks to track the milkman or where he is, e.g. \"where\", \"લોકેશન\", \"ક્યાં છે\").\n" +
+                        "- CANCEL_PLAN (when user wants to permanently cancel, stop, or delete their milk delivery plan/subscription, e.g. \"cancel plan\", \"કાયમી બંધ કરો\", \"કાયમી બંધ\").\n\n" +
+                        "Respond ONLY with a valid JSON block containing:\n" +
+                        "{\n" +
+                        "  \"action\": \"EXTRA_MILK\" | \"CANCEL_EXTRA_MILK\" | \"PAUSE_DELIVERY\" | \"RESUME_DELIVERY\" | \"CHECK_BILL\" | \"CHECK_PAYMENT\" | \"TRACK_LOCATION\" | \"CANCEL_PLAN\" | \"NONE\",\n" +
+                        "  \"quantity\": double (only for EXTRA_MILK, else 0.0),\n" +
+                        "  \"days\": int (for EXTRA_MILK or PAUSE_DELIVERY, else 0)\n" +
+                        "}\n" +
+                        "Do not write any explanation or markdown code block wrapper. Return ONLY the raw JSON string.\n\n" +
+                        "User Message: \"" + text + "\"";
+
+                Map<String, Object> requestBody = new HashMap<>();
+                requestBody.put("model", ollamaModel);
+                requestBody.put("prompt", prompt);
+                requestBody.put("format", "json");
+                requestBody.put("stream", false);
+
+                logger.info("Sending request to local Ollama API ({}) using model: {} for text: {}", ollamaUrl, ollamaModel, text);
+                Map<String, Object> response = restTemplate.postForObject(ollamaUrl + "/api/generate", requestBody, Map.class);
+                if (response != null && response.containsKey("response")) {
+                    String content = (String) response.get("response");
+                    if (content != null) {
+                        content = content.trim();
+                        logger.info("Ollama response content: {}", content);
+                        ObjectMapper mapper = new ObjectMapper();
+                        Map<String, Object> parsedMap = mapper.readValue(content, Map.class);
+                        if (parsedMap != null && parsedMap.containsKey("action")) {
+                            result.put("action", parsedMap.get("action"));
+                            result.put("quantity", parsedMap.containsKey("quantity") ? Double.parseDouble(parsedMap.get("quantity").toString()) : 0.0);
+                            result.put("days", parsedMap.containsKey("days") ? Integer.parseInt(parsedMap.get("days").toString()) : 0);
+                            return result;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Local Ollama parser failed: {}. Falling back to local Regex parser.", e.getMessage());
             }
         }
 
@@ -331,6 +384,81 @@ public class OllamaAiServiceImpl implements OllamaAiService {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public String generateConversationalReply(String userMessage) {
+        String systemPrompt = "You are a friendly, helpful customer support assistant for 'Smart Milk Delivery'.\n" +
+                "Here is our business info:\n" +
+                "- Buffalo Milk: ₹68 per liter\n" +
+                "- Cow Milk: ₹58 per liter\n" +
+                "- Deliveries happen daily in the morning between 6:00 AM and 8:30 AM.\n" +
+                "- Customers can manage extra milk, pauses, and bill checking via this bot.\n" +
+                "- Payments can be made via any UPI app using the QR code in their invoice.\n\n" +
+                "Answer the customer's question politely and concisely in the language they used (Gujarati, English, or mixed Gujlish).\n" +
+                "If they are requesting a delivery change (like pausing, resuming, or extra milk), guide them to use the keyboard buttons or say it clearly so our parser can catch it.\n" +
+                "Keep your answer short (maximum 2-3 sentences). Do not write any explanation or prefix, just answer them.";
+
+        // 1. Try OpenAI if key is present
+        if (openAiApiKey != null && !openAiApiKey.isBlank()) {
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(openAiApiKey);
+
+                Map<String, Object> requestBody = new HashMap<>();
+                requestBody.put("model", "gpt-3.5-turbo");
+                requestBody.put("temperature", 0.7);
+
+                List<Map<String, String>> messages = new java.util.ArrayList<>();
+                Map<String, String> systemMsg = new HashMap<>();
+                systemMsg.put("role", "system");
+                systemMsg.put("content", systemPrompt);
+                messages.add(systemMsg);
+
+                Map<String, String> userMsg = new HashMap<>();
+                userMsg.put("role", "user");
+                userMsg.put("content", userMessage);
+                messages.add(userMsg);
+
+                requestBody.put("messages", messages);
+
+                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+                Map<String, Object> response = restTemplate.postForObject("https://api.openai.com/v1/chat/completions", entity, Map.class);
+                if (response != null && response.containsKey("choices")) {
+                    List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+                    if (choices != null && !choices.isEmpty()) {
+                        Map<String, Object> choice = choices.get(0);
+                        Map<String, Object> message = (Map<String, Object>) choice.get("message");
+                        if (message != null && message.containsKey("content")) {
+                            return ((String) message.get("content")).trim();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("OpenAI conversational reply failed: {}. Falling back to Ollama.", e.getMessage());
+            }
+        }
+
+        // 2. Try Ollama
+        try {
+            String combinedPrompt = systemPrompt + "\n\nCustomer Message: \"" + userMessage + "\"\nAssistant Response:";
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("model", ollamaModel);
+            requestBody.put("prompt", combinedPrompt);
+            requestBody.put("stream", false);
+
+            logger.info("Sending conversational query to Ollama ({}) using model: {}", ollamaUrl, ollamaModel);
+            Map<String, Object> response = restTemplate.postForObject(ollamaUrl + "/api/generate", requestBody, Map.class);
+            if (response != null && response.containsKey("response")) {
+                return ((String) response.get("response")).trim();
+            }
+        } catch (Exception e) {
+            logger.warn("Ollama conversational reply failed: {}. Falling back to default text.", e.getMessage());
+        }
+
+        // 3. Ultimate static fallback
+        return "આભાર! તમારો સંદેશ મળ્યો છે. અમારી ટીમ ટૂંક સમયમાં તમારો સંપર્ક કરશે. (Thank you! Your message has been received. Our team will contact you shortly.)";
     }
 }
 

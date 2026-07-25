@@ -7,4 +7,5 @@ public interface TelegramService {
     void sendPaymentReminderNotification(String telegramId, String customerName, double amount);
     void sendWelcomeNotification(String telegramId, String customerName);
     void sendOtpNotification(String telegramId, String otpCode);
+    void sendBillDocument(String telegramId, byte[] pdfBytes, String filename);
 }

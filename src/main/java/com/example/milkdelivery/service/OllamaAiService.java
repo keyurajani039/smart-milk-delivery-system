@@ -4,4 +4,5 @@ import java.util.Map;
 
 public interface OllamaAiService {
     Map<String, Object> parseGujaratiRequest(String text);
+    String generateConversationalReply(String userMessage);
 }

@@ -586,7 +586,8 @@ public class TelegramBotController {
                         "Your milk delivery plan has been permanently cancelled. You can send /start_plan anytime to start a new plan.";
                 sendTelegramMessage(chatInstanceId, cancelPlanMsg);
             } else {
-                sendTelegramMessageWithReplyMarkup(chatInstanceId, "સમજવામાં ભૂલ થઈ. કૃપા કરીને સ્પષ્ટ કહી શકો છો? (Could not understand request. Please say it clearly.)", CUSTOM_KEYBOARD_JSON);
+                String aiReply = aiService.generateConversationalReply(text);
+                sendTelegramMessageWithReplyMarkup(chatInstanceId, aiReply, CUSTOM_KEYBOARD_JSON);
             }
         }
 

@@ -89,7 +89,7 @@ public class TelegramServiceImpl implements TelegramService {
             return;
         }
 
-        if ("mock_telegram_token".equals(botToken)) {
+        if (botToken == null || botToken.isBlank() || "mock_telegram_token".equals(botToken) || "mock_telegram_bot_token".equals(botToken)) {
             logger.info("[MOCK TELEGRAM BOT] Sending to {}: \n{}", telegramId, text);
             return;
         }
@@ -104,6 +104,43 @@ public class TelegramServiceImpl implements TelegramService {
             logger.info("Successfully sent telegram notification to {}", telegramId);
         } catch (Exception e) {
             logger.error("Failed to send telegram message to {}: {}", telegramId, e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendBillDocument(String telegramId, byte[] pdfBytes, String filename) {
+        if (telegramId == null || telegramId.isBlank()) {
+            logger.warn("Skipping telegram document. telegramId is empty.");
+            return;
+        }
+
+        if (botToken == null || botToken.isBlank() || "mock_telegram_token".equals(botToken) || "mock_telegram_bot_token".equals(botToken)) {
+            logger.info("[MOCK TELEGRAM BOT] Sending document to {}: filename={}, bytes={}", telegramId, filename, pdfBytes.length);
+            return;
+        }
+
+        try {
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
+
+            org.springframework.util.MultiValueMap<String, Object> body = new org.springframework.util.LinkedMultiValueMap<>();
+            org.springframework.core.io.ByteArrayResource fileResource = new org.springframework.core.io.ByteArrayResource(pdfBytes) {
+                @Override
+                public String getFilename() {
+                    return filename;
+                }
+            };
+            body.add("chat_id", telegramId);
+            body.add("document", fileResource);
+
+            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, Object>> requestEntity = 
+                    new org.springframework.http.HttpEntity<>(body, headers);
+
+            String url = String.format("https://api.telegram.org/bot%s/sendDocument", botToken);
+            restTemplate.postForEntity(url, requestEntity, String.class);
+            logger.info("Successfully sent telegram document to {}", telegramId);
+        } catch (Exception e) {
+            logger.error("Failed to send telegram document to {}: {}", telegramId, e.getMessage());
         }
     }
 }

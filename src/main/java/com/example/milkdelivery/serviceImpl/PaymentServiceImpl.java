@@ -124,6 +124,17 @@ public class PaymentServiceImpl implements PaymentService {
                     month,
                     year
             );
+
+            try {
+                byte[] pdfBytes = generateInvoicePdf(bill.getId());
+                if (pdfBytes != null && pdfBytes.length > 0) {
+                    String filename = String.format("invoice-%02d-%d.pdf", month, year);
+                    telegramService.sendBillDocument(customer.getTelegramId(), pdfBytes, filename);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to auto-send PDF invoice to customer {}: {}", customer.getId(), e.getMessage());
+            }
+
             return bill;
         }
 
@@ -147,6 +158,16 @@ public class PaymentServiceImpl implements PaymentService {
                 month,
                 year
         );
+
+        try {
+            byte[] pdfBytes = generateInvoicePdf(saved.getId());
+            if (pdfBytes != null && pdfBytes.length > 0) {
+                String filename = String.format("invoice-%02d-%d.pdf", month, year);
+                telegramService.sendBillDocument(customer.getTelegramId(), pdfBytes, filename);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to auto-send PDF invoice to customer {}: {}", customer.getId(), e.getMessage());
+        }
 
         return saved;
     }
