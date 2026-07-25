@@ -35,10 +35,26 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p ${{ secrets.VPS_PORT || 22 }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy JAR and Restart Service
+      - name: Deploy JAR, Write Environment Secrets, and Restart Service
         run: |
           # Copy compiled JAR file directly via native SCP
           scp -P ${{ secrets.VPS_PORT || 22 }} target/milkdelivery-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/milkdelivery-0.0.1-SNAPSHOT.jar
 
-          # Execute SSH command to restart systemd service
-          ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery"
+          # Create production environment variables file on server from GitHub Secrets
+          ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
+            mkdir -p ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
+            cat << 'EOF' > ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/app.env
+DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
+DB_PORT=${{ secrets.DB_PORT || '3306' }}
+DB_NAME=${{ secrets.DB_NAME || 'smart_milk_delivery' }}
+DB_USER=${{ secrets.DB_USER || 'root' }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD || 'root' }}
+JWT_SECRET=${{ secrets.JWT_SECRET || 'smart_milk_delivery_super_secret_jwt_key_2026_very_long_string' }}
+TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN || 'mock_telegram_bot_token' }}
+TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_username' }}
+RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID || 'rzp_test_mock_key_id' }}
+RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET || 'mock_razorpay_key_secret' }}
+RAZORPAY_WEBHOOK_SECRET=${{ secrets.RAZORPAY_WEBHOOK_SECRET || 'mock_webhook_secret' }}
+EOF
+            sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery
+          "
