@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="smart-milk">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)"/>
+            <column name="last_name" type="VARCHAR(100)"/>
+            <column name="milk_company_name" type="VARCHAR(150)"/>
+            <column name="phone_number" type="VARCHAR(20)">
+                <constraints unique="true"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="telegram_id" type="VARCHAR(100)">
+                <constraints unique="true"/>
+            </column>
+            <column name="role" type="VARCHAR(50)"/>
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="profile_image" type="VARCHAR(255)"/>
+            <column name="trial_start_date" type="DATETIME"/>
+            <column name="trial_end_date" type="DATETIME"/>
+            <column name="subscription_end_date" type="DATETIME"/>
+            <column name="is_blocked" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="subscription_plan_id" type="BIGINT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="smart-milk">
+        <createTable tableName="milk_categories">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="category_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_per_liter" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="smart-milk">
+        <createTable tableName="customers">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(20)"/>
+            <column name="telegram_id" type="VARCHAR(100)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="latitude" type="DOUBLE"/>
+            <column name="longitude" type="DOUBLE"/>
+            <column name="milk_quantity" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="extra_milk" type="DOUBLE" defaultValueNumeric="0.0"/>
+            <column name="extra_milk_days" type="INT" defaultValueNumeric="0"/>
+            <column name="is_paused" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="pause_days" type="INT" defaultValueNumeric="0"/>
+            <column name="pause_start_date" type="DATE"/>
+            <column name="pause_end_date" type="DATE"/>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_completed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="milk_category_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="customers" baseColumnNames="milk_category_id" constraintName="fk_customer_milk_category" referencedTableName="milk_categories" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="customers" baseColumnNames="user_id" constraintName="fk_customer_user" referencedTableName="users" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="4" author="smart-milk">
+        <createTable tableName="deliveries">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+            <column name="delivery_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_time" type="DATETIME"/>
+            <column name="milk_quantity" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="extra_milk" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_milk" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="latitude" type="DOUBLE"/>
+            <column name="longitude" type="DOUBLE"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="deliveries" baseColumnNames="customer_id" constraintName="fk_delivery_customer" referencedTableName="customers" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="deliveries" baseColumnNames="user_id" constraintName="fk_delivery_user" referencedTableName="users" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="5" author="smart-milk">
+        <createTable tableName="payments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT"/>
+            <column name="month" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="year" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_type" type="VARCHAR(50)"/>
+            <column name="payment_date" type="DATE"/>
+            <column name="remarks" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="payments" baseColumnNames="customer_id" constraintName="fk_payment_customer" referencedTableName="customers" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="6" author="smart-milk">
+        <createTable tableName="routes">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="route_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT"/>
+            <column name="total_distance" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_customers" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="routes" baseColumnNames="user_id" constraintName="fk_route_user" referencedTableName="users" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="7" author="smart-milk">
+        <createTable tableName="route_details">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="route_id" type="BIGINT"/>
+            <column name="customer_id" type="BIGINT"/>
+            <column name="sequence_number" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="route_details" baseColumnNames="route_id" constraintName="fk_route_detail_route" referencedTableName="routes" referencedColumnNames="id" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="route_details" baseColumnNames="customer_id" constraintName="fk_route_detail_customer" referencedTableName="customers" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="8" author="smart-milk">
+        <createTable tableName="trackings">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT"/>
+            <column name="latitude" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="longitude" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="speed" type="DOUBLE"/>
+            <column name="timestamp" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="trackings" baseColumnNames="user_id" constraintName="fk_tracking_user" referencedTableName="users" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="9" author="smart-milk">
+        <createTable tableName="subscription_plans">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration_days" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_customers" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="features_json" type="VARCHAR(1000)"/>
+        </createTable>
+
+        <createTable tableName="user_device_sessions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT"/>
+            <column name="device_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_active" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>
+            <column name="token_hash" type="VARCHAR(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="user_device_sessions" baseColumnNames="user_id" constraintName="fk_device_session_user" referencedTableName="users" referencedColumnNames="id" onDelete="CASCADE"/>
+
+        <insert tableName="subscription_plans">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="Free Trial"/>
+            <column name="price" valueNumeric="0.0"/>
+            <column name="duration_days" valueNumeric="67"/>
+            <column name="max_customers" valueNumeric="15"/>
+            <column name="features_json" value='{"features": ["basic_tracking", "telegram_bot", "qr_payment"]}'/>
+        </insert>
+        <insert tableName="subscription_plans">
+            <column name="id" valueNumeric="2"/>
+            <column name="name" value="Bronze Plan"/>
+            <column name="price" valueNumeric="299.0"/>
+            <column name="duration_days" valueNumeric="30"/>
+            <column name="max_customers" valueNumeric="50"/>
+            <column name="features_json" value='{"features": ["basic_tracking", "telegram_bot", "qr_payment"]}'/>
+        </insert>
+        <insert tableName="subscription_plans">
+            <column name="id" valueNumeric="3"/>
+            <column name="name" value="Silver Plan"/>
+            <column name="price" valueNumeric="599.0"/>
+            <column name="duration_days" valueNumeric="90"/>
+            <column name="max_customers" valueNumeric="150"/>
+            <column name="features_json" value='{"features": ["route_optimization", "telegram_bot", "pdf_invoices", "qr_payment"]}'/>
+        </insert>
+        <insert tableName="subscription_plans">
+            <column name="id" valueNumeric="4"/>
+            <column name="name" value="Gold Plan"/>
+            <column name="price" valueNumeric="1999.0"/>
+            <column name="duration_days" valueNumeric="365"/>
+            <column name="max_customers" valueNumeric="9999"/>
+            <column name="features_json" value='{"features": ["route_optimization", "telegram_bot", "pdf_invoices", "qr_payment", "gujarati_ai_bot"]}'/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
