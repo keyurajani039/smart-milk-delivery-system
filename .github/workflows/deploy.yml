@@ -40,15 +40,5 @@ jobs:
           # Copy compiled JAR file directly via native SCP
           scp -P ${{ secrets.VPS_PORT || 22 }} target/milkdelivery-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/milkdelivery-0.0.1-SNAPSHOT.jar
 
-          # Execute SSH commands to restart service
-          ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
-            if systemctl is-active --quiet smart-milk-delivery; then
-              echo 'Restarting smart-milk-delivery systemd service...'
-              sudo systemctl restart smart-milk-delivery
-            else
-              echo 'Starting application with nohup...'
-              cd ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
-              pkill -f 'milkdelivery-0.0.1-SNAPSHOT.jar' || true
-              nohup java -jar milkdelivery-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-            fi
-          "
+          # Execute SSH command to restart systemd service
+          ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery"
