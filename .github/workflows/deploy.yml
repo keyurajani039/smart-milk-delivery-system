@@ -55,3 +55,13 @@ TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_us
 EOF
             sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery
           "
+
+      - name: Debug VPS Logs and Env
+        run: |
+          ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
+            echo '=== Checking app.env variables ==='
+            grep -E 'TELEGRAM_BOT_TOKEN' ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/app.env || true
+            echo '=== Latest 100 lines of systemd service logs ==='
+            sudo journalctl -u smart-milk-delivery -n 100 --no-pager || true
+          "
+
