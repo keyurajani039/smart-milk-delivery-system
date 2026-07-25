@@ -31,7 +31,7 @@ public class TelegramLongPollingService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void startPolling() {
-        if ("mock_telegram_token".equals(botToken)) {
+        if (botToken == null || botToken.isBlank() || "mock_telegram_token".equals(botToken) || "mock_telegram_bot_token".equals(botToken)) {
             logger.info("Telegram Long Polling: Disabled (Mock Token active).");
             return;
         }

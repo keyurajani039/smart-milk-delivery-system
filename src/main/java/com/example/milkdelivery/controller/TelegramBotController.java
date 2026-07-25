@@ -594,7 +594,7 @@ public class TelegramBotController {
     }
 
     private void sendTelegramMessage(String chatId, String msg) {
-        if ("mock_telegram_token".equals(botToken)) {
+        if (botToken == null || botToken.isBlank() || "mock_telegram_token".equals(botToken) || "mock_telegram_bot_token".equals(botToken)) {
             logger.info("[MOCK TELEGRAM BOT REPLY] To Chat ID: {}, Message: \n{}", chatId, msg);
             return;
         }
@@ -610,7 +610,7 @@ public class TelegramBotController {
     }
 
     private void sendTelegramMessageWithReplyMarkup(String chatId, String msg, String replyMarkupJson) {
-        if ("mock_telegram_token".equals(botToken)) {
+        if (botToken == null || botToken.isBlank() || "mock_telegram_token".equals(botToken) || "mock_telegram_bot_token".equals(botToken)) {
             logger.info("[MOCK TELEGRAM BOT REPLY WITH MARKUP] To Chat ID: {}, Message: \n{}, Markup: {}", chatId, msg, replyMarkupJson);
             return;
         }
@@ -760,7 +760,7 @@ public class TelegramBotController {
     }
 
     private void sendTelegramDocument(String chatId, byte[] fileBytes, String filename) {
-        if ("mock_telegram_token".equals(botToken)) {
+        if (botToken == null || botToken.isBlank() || "mock_telegram_token".equals(botToken) || "mock_telegram_bot_token".equals(botToken)) {
             logger.info("[MOCK TELEGRAM BOT REPLY DOCUMENT] To Chat ID: {}, Filename: {}, Bytes length: {}", chatId, filename, fileBytes.length);
             return;
         }
