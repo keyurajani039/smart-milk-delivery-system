@@ -52,9 +52,6 @@ DB_PASSWORD=${{ secrets.DB_PASSWORD || 'root' }}
 JWT_SECRET=${{ secrets.JWT_SECRET || 'smart_milk_delivery_super_secret_jwt_key_2026_very_long_string' }}
 TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN || 'mock_telegram_bot_token' }}
 TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_username' }}
-RAZORPAY_KEY_ID=${{ secrets.RAZORPAY_KEY_ID || 'rzp_test_mock_key_id' }}
-RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET || 'mock_razorpay_key_secret' }}
-RAZORPAY_WEBHOOK_SECRET=${{ secrets.RAZORPAY_WEBHOOK_SECRET || 'mock_webhook_secret' }}
 EOF
             sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery
           "
