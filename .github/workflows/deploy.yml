@@ -59,6 +59,8 @@ jobs:
       - name: Debug VPS Logs and Env
         run: |
           ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
+            echo '=== Waiting 20 seconds for application to start... ==='
+            sleep 20
             echo '=== Checking app.env variables ==='
             grep -E 'TELEGRAM_BOT_TOKEN' ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/app.env || true
             echo '=== Latest 100 lines of systemd service logs ==='
