@@ -44,14 +44,14 @@ jobs:
           ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
             mkdir -p ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
             cat << 'EOF' > ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/app.env
-          DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
-          DB_PORT=${{ secrets.DB_PORT || '3306' }}
-          DB_NAME=${{ secrets.DB_NAME || 'smart_milk_delivery' }}
-          DB_USER=${{ secrets.DB_USER || 'root' }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD || 'root' }}
-          JWT_SECRET=${{ secrets.JWT_SECRET || 'smart_milk_delivery_super_secret_jwt_key_2026_very_long_string' }}
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN || 'mock_telegram_bot_token' }}
-          TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_username' }}
-          EOF
+DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
+DB_PORT=${{ secrets.DB_PORT || '3306' }}
+DB_NAME=${{ secrets.DB_NAME || 'smart_milk_delivery' }}
+DB_USER=${{ secrets.DB_USER || 'root' }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD || 'root' }}
+JWT_SECRET=${{ secrets.JWT_SECRET || 'smart_milk_delivery_super_secret_jwt_key_2026_very_long_string' }}
+TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN || 'mock_telegram_bot_token' }}
+TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_username' }}
+EOF
             sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery
           "
