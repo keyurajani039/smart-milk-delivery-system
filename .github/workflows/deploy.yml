@@ -54,6 +54,8 @@ jobs:
           JWT_SECRET=${{ secrets.JWT_SECRET || 'smart_milk_delivery_super_secret_jwt_key_2026_very_long_string' }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN || 'mock_telegram_bot_token' }}
           TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_username' }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY || '' }}
+          OLLAMA_API_URL=${{ secrets.OLLAMA_API_URL || 'http://localhost:11434' }}
           EOF
 
             # 2. Update systemd service file to include EnvironmentFile
