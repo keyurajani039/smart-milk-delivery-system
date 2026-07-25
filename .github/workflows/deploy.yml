@@ -40,9 +40,11 @@ jobs:
           # Copy compiled JAR file directly via native SCP
           scp -P ${{ secrets.VPS_PORT || 22 }} target/milkdelivery-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/milkdelivery-0.0.1-SNAPSHOT.jar
 
-          # Create production environment variables file on server
+          # Create production environment variables file on server and update systemd service file
           ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
             mkdir -p ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
+            
+            # 1. Update app.env
             cat << 'EOF' > ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/app.env
           DB_HOST=${{ secrets.DB_HOST || 'localhost' }}
           DB_PORT=${{ secrets.DB_PORT || '3306' }}
@@ -53,6 +55,28 @@ jobs:
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN || 'mock_telegram_bot_token' }}
           TELEGRAM_BOT_USERNAME=${{ secrets.TELEGRAM_BOT_USERNAME || 'mock_telegram_bot_username' }}
           EOF
+
+            # 2. Update systemd service file to include EnvironmentFile
+            cat << 'EOF' | sudo tee /etc/systemd/system/smart-milk-delivery.service
+          [Unit]
+          Description=Smart Milk Delivery Application
+          After=network.target mysql.service redis.service
+
+          [Service]
+          User=${{ secrets.VPS_USERNAME }}
+          WorkingDirectory=${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
+          EnvironmentFile=${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/app.env
+          ExecStart=/usr/bin/java -jar ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/milkdelivery-0.0.1-SNAPSHOT.jar
+          SuccessExitStatus=143
+          Restart=always
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+            # 3. Reload systemd daemon and restart service
+            sudo systemctl daemon-reload
             sudo systemctl restart smart-milk-delivery || sudo systemctl start smart-milk-delivery
           "
 
