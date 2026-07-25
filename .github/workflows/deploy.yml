@@ -25,32 +25,30 @@ jobs:
       - name: Build Jar with Maven
         run: mvn clean package -DskipTests
 
-      - name: Copy JAR to Ubuntu VPS
-        uses: appleboy/scp-action@v0.1.7
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          source: "target/milkdelivery-0.0.1-SNAPSHOT.jar"
-          target: ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
-          strip_components: 1
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Restart Application Service on Ubuntu VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script: |
-            mkdir -p ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
+      - name: Add SSH Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.VPS_PORT || 22 }} -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy JAR and Restart Service
+        run: |
+          # Copy compiled JAR file directly via native SCP
+          scp -P ${{ secrets.VPS_PORT || 22 }} target/milkdelivery-0.0.1-SNAPSHOT.jar ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}/milkdelivery-0.0.1-SNAPSHOT.jar
+
+          # Execute SSH commands to restart service
+          ssh -p ${{ secrets.VPS_PORT || 22 }} ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} "
             if systemctl is-active --quiet smart-milk-delivery; then
-              echo "Restarting smart-milk-delivery systemd service..."
+              echo 'Restarting smart-milk-delivery systemd service...'
               sudo systemctl restart smart-milk-delivery
             else
-              echo "Starting application with nohup..."
+              echo 'Starting application with nohup...'
               cd ${{ secrets.VPS_APP_DIR || '/opt/smart-milk-delivery' }}
               pkill -f 'milkdelivery-0.0.1-SNAPSHOT.jar' || true
               nohup java -jar milkdelivery-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
             fi
+          "
